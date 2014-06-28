@@ -1,6 +1,11 @@
+<h1>尚、この画像は自動的に消滅する。</h1>
+<p>
+このページは時限機能付き画像アップローダーです。<br />
+期限が来るまで、端の方から少しずつ画像が消えていきます。
+</p>
 <div class="uploadblock">
 	<form name="sendimg" method="post" action="/upload" enctype="MULTIPART/FORM-DATA">
-		<span>アップロードファイル</span><br />
+		<span>画像をアップロードする</span><br />
 		<input type="file" name="file" size="20" /><br />
 		<br />
 		<textarea name="comment" cols=40 rows=4></textarea><br />
@@ -19,7 +24,7 @@
 				<img src="<%= "thumbs/thumb_" + imgdata["imagefilename"] %>" width="80" height="80" />
 			</a>
 			<p>
-				<%= imgdata["comment"] %>
+				<%= h imgdata["comment"] %>
 			</p>
 			<p>
 				posted at <%= imgdata["posttime"] %>

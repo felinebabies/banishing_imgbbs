@@ -191,8 +191,7 @@ def getbanishingtimeinfo(posttime, timelimitmin)
 	timeinfo = {
 		"percent" => percent,
 		"leftminutes" => diffminutes,
-		"limittime" => limittime,
-		"limitminutes" => (limitminutes / (24.0 * 60.0))
+		"limittime" => limittime
 	}
 
 	return timeinfo
@@ -201,8 +200,6 @@ end
 #削除途中画像を生成して、ファイルパスを返す
 def getbanishingimg(imgdata)
 	timeinfo = getbanishingtimeinfo(imgdata["posttime"], imgdata["timelimit"])
-
-pp timeinfo
 
 	banishingfilename = timeinfo["percent"].to_s + "_" + imgdata["imagefilename"] 
 
@@ -226,6 +223,13 @@ pp timeinfo
 	rgb.write(bimgpath)
 
 	return bimgpath
+end
+
+#ヘルパー定義
+helpers do
+	#サニタイズ用関数を使用する用意
+	include Rack::Utils
+	alias_method :h, :escape_html
 end
 
 #一覧画面
@@ -273,6 +277,10 @@ end
 #アップロードした画像の表示
 get '/view/:imgid' do
 	@imgdata = BanishingImgDb.getimage(params[:imgid]).first
+
+	if @imgdata then
+		@timeinfo = getbanishingtimeinfo(@imgdata["posttime"], @imgdata["timelimit"])
+	end
 
 	erb :viewimg
 end

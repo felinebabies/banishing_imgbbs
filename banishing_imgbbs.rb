@@ -104,8 +104,6 @@ module BanishingImgDb
 
 		self.inittable
 
-		#画像の時間切れ判定を行う
-
 		#検索実行
 		db = SQLite3::Database.new(DBFILENAME)
 		imagelist = db.execute(selectsql).collect do |row|
@@ -125,7 +123,10 @@ module BanishingImgDb
 		end
 		db.close
 
-		return imagelist
+		#画像の時間切れ判定を行う
+		alivelist = filteraliveimg(imagelist)
+
+		return alivelist
 	end
 
 	#画像一枚の情報を取得する
@@ -134,8 +135,6 @@ module BanishingImgDb
 		selectsql = "SELECT * FROM BANISHINGIMAGE WHERE id = ? AND alive = 1"
 
 		self.inittable
-
-		#画像の時間切れ判定を行う
 
 		#検索実行
 		db = SQLite3::Database.new(DBFILENAME)
@@ -156,7 +155,23 @@ module BanishingImgDb
 		end
 		db.close
 
-		return imagelist
+		#画像の時間切れ判定を行う
+		alivelist = filteraliveimg(imagelist)
+
+		return alivelist
+	end
+
+	#画像の有効情報を変更する
+	def setimgalive(alive, imgid)
+		updatesql = "UPDATE BANISHINGIMAGE SET alive = ? WHERE id = ?"
+
+		#アップデート実行
+		db = SQLite3::Database.new(DBFILENAME)
+		db.execute(updatesql,
+			alive,
+			imgid
+		)
+		db.close
 	end
 
 	module_function :createtable
@@ -165,6 +180,7 @@ module BanishingImgDb
 	module_function :insertimage
 	module_function :getimagelist
 	module_function :getimage
+	module_function :setimgalive
 end
 
 #時刻情報を返す
@@ -223,6 +239,23 @@ def getbanishingimg(imgdata)
 	rgb.write(bimgpath)
 
 	return bimgpath
+end
+
+#時間切れの画像をリストとDBから削除する
+def filteraliveimg(imagelist)
+	alivelist = imagelist.select do |imgdata|
+		aliveflag = true
+		timeinfo = getbanishingtimeinfo(imgdata["posttime"], imgdata["timelimit"])
+
+		if timeinfo["percent"] <= 0 then
+			setimgalive(0, imgdata["id"])
+			aliveflag = false
+		end
+
+		aliveflag
+	end
+
+	return alivelist
 end
 
 #ヘルパー定義

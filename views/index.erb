@@ -1,0 +1,30 @@
+<div class="uploadblock">
+	<form name="sendimg" method="post" action="/upload" enctype="MULTIPART/FORM-DATA">
+		<span>アップロードファイル</span><br />
+		<input type="file" name="file" size="20" /><br />
+		<br />
+		<textarea name="comment" cols=40 rows=4></textarea><br />
+		<input type="submit" value="SUBMIT" />
+	</form>
+</div>
+
+<hr />
+
+<div class="imglist">
+	<% @imglist.each do |imgdata| %>
+		<div class="imgdata">
+			ID&nbsp;:&nbsp;<%= imgdata["id"] %>&nbsp;
+			originalname&nbsp;:&nbsp;<%= imgdata["originalfilename"] %><br />
+			<a href="/view/<%= imgdata["id"] %>">
+				<img src="<%= "thumbs/thumb_" + imgdata["imagefilename"] %>" width="80" height="80" />
+			</a>
+			<p>
+				<%= imgdata["comment"] %>
+			</p>
+			<p>
+				posted at <%= imgdata["posttime"] %>
+			</p>
+		</div>
+		<hr />
+	<% end %>
+</div>

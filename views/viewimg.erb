@@ -1,0 +1,13 @@
+﻿<% if @imgdata then %>
+<div class="imgview">
+<img src="/image/<%= @imgdata["id"] %>" alt="<%= @imgdata["originalfilename"] %>"/><br />
+<p>
+	投稿日時：<%= @imgdata["posttime"] %><br />
+	
+</p>
+</div>
+<% end %>
+
+<p>
+	<a href="/">戻る</a>
+</p>

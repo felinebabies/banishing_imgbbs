@@ -286,11 +286,17 @@ post '/upload' do
 			@mes = "アップロードに成功しました。"
 		end
 
+		#制限時間の取得
+		timelimit = params[:timelimitmin].to_i
+		if timelimit < 60 || timelimit > 1440 then
+			timelimit = 180
+		end
+
 		#データベースへの登録
 		imgarr = {
 			"imagefilename" => imagename,
 			"originalfilename" => params[:file][:filename],
-			"timelimit" => 180,
+			"timelimit" => timelimit,
 			"banishtype" => 0,
 			"banishdirection" => 0,
 			"ipaddress" => request.ip,

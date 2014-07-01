@@ -8,6 +8,15 @@
 		<span>画像をアップロードする</span><br />
 		<input type="file" name="file" accept="image/jpeg,image/png" size="20" /><br />
 		<br />
+		画像消滅までの時間<br />
+		<select name="timelimitmin">
+			<option value="60">1時間</option>
+			<option value="180" selected>3時間</option>
+			<option value="360">6時間</option>
+			<option value="720">12時間</option>
+			<option value="1440">24時間</option>
+		</select>
+		<br />
 		コメント<br />
 		<textarea name="comment" cols=40 rows=4></textarea><br />
 		<input type="submit" value="SUBMIT" />

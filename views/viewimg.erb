@@ -4,7 +4,7 @@
 <p>
 	投稿日時：<%= @imgdata["posttime"] %><br />
 	完全消滅まで：<%= @timeinfo["leftminutes"] %>分<br />
-	コメント：<%= h @imgdata["comment"] %>
+	コメント：<%= (h @imgdata["comment"]).gsub(/\n/, '<br/>') %>
 </p>
 </div>
 <% end %>

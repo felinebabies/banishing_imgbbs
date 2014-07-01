@@ -232,8 +232,11 @@ def getbanishingimg(imgdata)
 
 	fillheight = (rgb.rows * ((100 - timeinfo["percent"]).to_f / 100.0)).to_i
 
+	#背景画像を用意
+	bgimage = Magick::ImageList.new("background.png").first
+
 	Magick::Draw.new do
-		self.fill = "black"
+		self.fill_pattern = bgimage
 	end.rectangle(0, (rgb.rows - fillheight), rgb.columns, rgb.rows).draw(rgb)
 
 	rgb.write(bimgpath)

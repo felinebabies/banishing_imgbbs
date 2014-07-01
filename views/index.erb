@@ -27,7 +27,9 @@
 				<%= (h imgdata["comment"]).gsub(/\n/, '<br/>') %>
 			</p>
 			<p>
-				posted at <%= imgdata["posttime"] %>
+				投稿日時：<%= imgdata["posttime"] %><br />
+				消滅予定時刻：<%= imgdata["limittime"] %><br />
+				完全消滅まで：<%= imgdata["leftminutes"] %>分
 			</p>
 		</div>
 		<hr />

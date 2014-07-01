@@ -3,6 +3,7 @@
 <img src="/image/<%= @imgdata["id"] %>" alt="<%= @imgdata["originalfilename"] %>"/><br />
 <p>
 	投稿日時：<%= @imgdata["posttime"] %><br />
+	消滅予定時刻：<%= @imgdata["limittime"] %><br />
 	完全消滅まで：<%= @imgdata["leftminutes"] %>分<br />
 	コメント：<%= (h @imgdata["comment"]).gsub(/\n/, '<br/>') %>
 </p>

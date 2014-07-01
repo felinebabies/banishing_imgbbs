@@ -207,7 +207,7 @@ def getbanishingtimeinfo(posttime, timelimitmin)
 	timeinfo = {
 		"percent" => percent,
 		"leftminutes" => diffminutes,
-		"limittime" => limittime
+		"limittime" => limittime.strftime("%Y-%m-%d %X")
 	}
 
 	return timeinfo

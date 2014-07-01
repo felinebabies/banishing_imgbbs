@@ -1,5 +1,5 @@
 ﻿# coding: utf-8
-
+# Copyright (C) 2014 Vestalis Quintet シュージ
 require "pp"
 require "mime/types"
 require "sqlite3"
@@ -11,6 +11,7 @@ require "sinatra/reloader"
 
 #set :environment, :production
 
+#データベース操作モジュール
 module BanishingImgDb
 	DBFILENAME = "banishingimgdb.db"
 	#テーブルを作る
@@ -112,7 +113,7 @@ module BanishingImgDb
 		}
 
 		#残時間情報を追加する
-		timeinfo = getbanishingtimeinfo(hashrow["posttime"], hashrow["timelimit"])
+		timeinfo = self.getbanishingtimeinfo(hashrow["posttime"], hashrow["timelimit"])
 		hashrow["percent"] = timeinfo["percent"]
 		hashrow["leftminutes"] = timeinfo["leftminutes"]
 		hashrow["limittime"] = timeinfo["limittime"]
@@ -173,6 +174,36 @@ module BanishingImgDb
 		db.close
 	end
 
+	#時刻情報を返す
+	def getbanishingtimeinfo(posttime, timelimitmin)
+		#画像投稿時刻を取得
+		posttime = DateTime.parse(posttime + "+9:00")
+
+		#時間制限（分単位）を取得
+		limitminutes = timelimitmin.to_f
+
+		#画像消滅予定時刻を生成
+		limittime = posttime + (limitminutes / (24.0 * 60.0))
+
+		#消滅予定時刻との差を分で生成
+		diffminutes = ((limittime - DateTime.now) * 24.0 * 60.0).to_i
+
+		#パーセンテージを計算する
+		if diffminutes <= 0 then
+			percent = 0
+		else
+			percent = ((diffminutes / limitminutes) * 100).to_i
+		end
+
+		timeinfo = {
+			"percent" => percent,
+			"leftminutes" => diffminutes,
+			"limittime" => limittime.strftime("%Y-%m-%d %X")
+		}
+
+		return timeinfo
+	end
+
 	module_function :createtable
 	module_function :tableexists?
 	module_function :inittable
@@ -181,43 +212,13 @@ module BanishingImgDb
 	module_function :getimagelist
 	module_function :getimage
 	module_function :setimgalive
-end
-
-#時刻情報を返す
-def getbanishingtimeinfo(posttime, timelimitmin)
-	#画像投稿時刻を取得
-	posttime = DateTime.parse(posttime + "+9:00")
-
-	#時間制限（分単位）を取得
-	limitminutes = timelimitmin.to_f
-
-	#画像消滅予定時刻を生成
-	limittime = posttime + (limitminutes / (24.0 * 60.0))
-
-	#消滅予定時刻との差を分で生成
-	diffminutes = ((limittime - DateTime.now) * 24.0 * 60.0).to_i
-
-	#パーセンテージを計算する
-	if diffminutes <= 0 then
-		percent = 0
-	else
-		percent = ((diffminutes / limitminutes) * 100).to_i
-	end
-
-	timeinfo = {
-		"percent" => percent,
-		"leftminutes" => diffminutes,
-		"limittime" => limittime.strftime("%Y-%m-%d %X")
-	}
-
-	return timeinfo
+	module_function :getbanishingtimeinfo
 end
 
 #削除途中画像を生成して、ファイルパスを返す
 def getbanishingimg(imgdata)
-	timeinfo = getbanishingtimeinfo(imgdata["posttime"], imgdata["timelimit"])
 
-	banishingfilename = timeinfo["percent"].to_s + "_" + imgdata["imagefilename"] 
+	banishingfilename = imgdata["percent"].to_s + "_" + imgdata["imagefilename"] 
 
 	bimgpath = File.join('banishingimg', banishingfilename)
 
@@ -230,7 +231,7 @@ def getbanishingimg(imgdata)
 	imgpath =  File.join('images', imgdata["imagefilename"])
 	rgb = Magick::ImageList.new(imgpath).first
 
-	fillheight = (rgb.rows * ((100 - timeinfo["percent"]).to_f / 100.0)).to_i
+	fillheight = (rgb.rows * ((100 - imgdata["percent"]).to_f / 100.0)).to_i
 
 	#背景画像を用意
 	bgimage = Magick::ImageList.new("background.png").first
@@ -248,9 +249,8 @@ end
 def filteraliveimg(imagelist)
 	alivelist = imagelist.select do |imgdata|
 		aliveflag = true
-		timeinfo = getbanishingtimeinfo(imgdata["posttime"], imgdata["timelimit"])
 
-		if timeinfo["percent"] <= 0 then
+		if imgdata["percent"] <= 0 then
 			setimgalive(0, imgdata["id"])
 			aliveflag = false
 		end

@@ -97,6 +97,29 @@ module BanishingImgDb
 		db.close
 	end
 
+	#select文の結果を画像情報ハッシュに変換する
+	def getimgdatafromrow(row)
+		hashrow = {
+			"id" => row[0],
+			"posttime" => row[1],
+			"imagefilename" => row[2],
+			"originalfilename" => row[3],
+			"timelimit" => row[4],
+			"banishtype" => row[5],
+			"banishdirection" => row[6],
+			"ipaddress" => row[8],
+			"comment" => row[9]
+		}
+
+		#残時間情報を追加する
+		timeinfo = getbanishingtimeinfo(hashrow["posttime"], hashrow["timelimit"])
+		hashrow["percent"] = timeinfo["percent"]
+		hashrow["leftminutes"] = timeinfo["leftminutes"]
+		hashrow["limittime"] = timeinfo["limittime"]
+
+		return hashrow
+	end
+
 	#画像の一覧を取得する
 	def getimagelist
 		#一覧検索
@@ -107,19 +130,7 @@ module BanishingImgDb
 		#検索実行
 		db = SQLite3::Database.new(DBFILENAME)
 		imagelist = db.execute(selectsql).collect do |row|
-			hashrow = {
-				"id" => row[0],
-				"posttime" => row[1],
-				"imagefilename" => row[2],
-				"originalfilename" => row[3],
-				"timelimit" => row[4],
-				"banishtype" => row[5],
-				"banishdirection" => row[6],
-				"ipaddress" => row[8],
-				"comment" => row[9]
-			}
-
-			hashrow
+			self.getimgdatafromrow(row)
 		end
 		db.close
 
@@ -139,19 +150,7 @@ module BanishingImgDb
 		#検索実行
 		db = SQLite3::Database.new(DBFILENAME)
 		imagelist = db.execute(selectsql, imgid).collect do |row|
-			hashrow = {
-				"id" => row[0],
-				"posttime" => row[1],
-				"imagefilename" => row[2],
-				"originalfilename" => row[3],
-				"timelimit" => row[4],
-				"banishtype" => row[5],
-				"banishdirection" => row[6],
-				"ipaddress" => row[8],
-				"comment" => row[9]
-			}
-
-			hashrow
+			self.getimgdatafromrow(row)
 		end
 		db.close
 
@@ -178,6 +177,7 @@ module BanishingImgDb
 	module_function :tableexists?
 	module_function :inittable
 	module_function :insertimage
+	module_function :getimgdatafromrow
 	module_function :getimagelist
 	module_function :getimage
 	module_function :setimgalive
@@ -313,10 +313,6 @@ end
 #アップロードした画像の表示
 get '/view/:imgid' do
 	@imgdata = BanishingImgDb.getimage(params[:imgid]).first
-
-	if @imgdata then
-		@timeinfo = getbanishingtimeinfo(@imgdata["posttime"], @imgdata["timelimit"])
-	end
 
 	erb :viewimg
 end

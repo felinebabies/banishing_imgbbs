@@ -74,6 +74,13 @@ end
 
 #投稿
 post '/upload' do
+	#コメントの長さ制限
+	if params[:comment].length > 1000 then
+		@mes = "コメントは1000文字以下でお願いします。"
+
+		return erb :upload
+	end
+
 	if params[:file]
 		fileext = File.extname(params[:file][:filename])
 		imagename = SecureRandom.uuid + fileext
@@ -83,33 +90,34 @@ post '/upload' do
 			f.write params[:file][:tempfile].read
 			@mes = "アップロードに成功しました。"
 		end
-
-		#制限時間の取得
-		timelimit = params[:timelimitmin].to_i
-		if timelimit < 60 || timelimit > 1440 then
-			timelimit = 180
-		end
-
-		#データベースへの登録
-		imgarr = {
-			"imagefilename" => imagename,
-			"originalfilename" => params[:file][:filename],
-			"timelimit" => timelimit,
-			"banishtype" => 0,
-			"banishdirection" => 0,
-			"ipaddress" => request.ip,
-			"comment" => params[:comment]
-		}
-
-		BanishingImgDb.insertimage(imgarr)
-
-		#サムネイルの作成
-		thumb_path = "./public/thumbs/thumb_" + imagename
-		rgb = Magick::ImageList.new(save_path)
-		rgb.resize_to_fill(80,80).write(thumb_path)
 	else
 		@mes = "アップロードに失敗しました。"
+		return erb :upload
 	end
+
+	#制限時間の取得
+	timelimit = params[:timelimitmin].to_i
+	if timelimit < 60 || timelimit > 1440 then
+		timelimit = 180
+	end
+
+	#データベースへの登録
+	imgarr = {
+		"imagefilename" => imagename,
+		"originalfilename" => params[:file][:filename],
+		"timelimit" => timelimit,
+		"banishtype" => 0,
+		"banishdirection" => 0,
+		"ipaddress" => request.ip,
+		"comment" => params[:comment]
+	}
+
+	BanishingImgDb.insertimage(imgarr)
+
+	#サムネイルの作成
+	thumb_path = "./public/thumbs/thumb_" + imagename
+	rgb = Magick::ImageList.new(save_path)
+	rgb.resize_to_fill(80,80).write(thumb_path)
 
 	erb :upload
 end

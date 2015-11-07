@@ -1,13 +1,8 @@
 ﻿# coding: utf-8
 # Copyright (C) 2014 Vestalis Quintet シュージ
-require "pp"
-require "mime/types"
-require "sqlite3"
-require "securerandom"
-require "date"
-require "RMagick"
-require "sinatra"
-require "sinatra/reloader"
+require 'bundler'
+Bundler.require
+
 
 require File.dirname(__FILE__) + '/banishingimgdb.rb'
 
@@ -16,7 +11,7 @@ require File.dirname(__FILE__) + '/banishingimgdb.rb'
 #削除途中画像を生成して、ファイルパスを返す
 def getbanishingimg(imgdata)
 
-	banishingfilename = imgdata["percent"].to_s + "_" + imgdata["imagefilename"] 
+	banishingfilename = imgdata["percent"].to_s + "_" + imgdata["imagefilename"]
 
 	bimgpath = File.join('banishingimg', banishingfilename)
 

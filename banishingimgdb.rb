@@ -1,13 +1,18 @@
 # coding: utf-8
-# Copyright (C) 2014 Vestalis Quintet ƒVƒ…[ƒW
+# Copyright (C) 2014 Vestalis Quintet ã‚·ãƒ¥ãƒ¼ã‚¸
+require 'bundler'
+Bundler.require
+require "pp"
+require "date"
+require "securerandom"
 
 
-#ƒf[ƒ^ƒx[ƒX‘€ìƒ‚ƒWƒ…[ƒ‹
+#ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹æ“ä½œãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 module BanishingImgDb
 	DBFILENAME = "banishingimgdb.db"
-	#ƒe[ƒuƒ‹‚ğì‚é
+	#ãƒ†ãƒ¼ãƒ–ãƒ«ã‚’ä½œã‚‹
 	def createtable
-		#ƒe[ƒuƒ‹’è‹`
+		#ãƒ†ãƒ¼ãƒ–ãƒ«å®šç¾©
 		createsql = <<-SQL
 		CREATE TABLE BANISHINGIMAGE (
 			id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -29,7 +34,7 @@ module BanishingImgDb
 		db.close
 	end
 
-	#•K—v‚Èƒe[ƒuƒ‹‚ª‚ ‚é‚©‚ğŠm”F‚·‚é
+	#å¿…è¦ãªãƒ†ãƒ¼ãƒ–ãƒ«ãŒã‚ã‚‹ã‹ã‚’ç¢ºèªã™ã‚‹
 	def tableexists?
 		db = SQLite3::Database.new(DBFILENAME)
 		tables = db.execute("SELECT tbl_name FROM sqlite_master WHERE type == 'table'").flatten
@@ -48,14 +53,14 @@ module BanishingImgDb
 		return result
 	end
 
-	#ƒe[ƒuƒ‹‚ª–³‚¯‚ê‚Îì‚é
+	#ãƒ†ãƒ¼ãƒ–ãƒ«ãŒç„¡ã‘ã‚Œã°ä½œã‚‹
 	def inittable
 		if ! self.tableexists? then
 			self.createtable
 		end
 	end
 
-	#‰æ‘œ‚ğV‚µ‚­“o˜^‚·‚é
+	#ç”»åƒã‚’æ–°ã—ãç™»éŒ²ã™ã‚‹
 	def insertimage(imgarr)
 		self.inittable
 		insertsql = <<-SQL
@@ -89,7 +94,7 @@ module BanishingImgDb
 		db.close
 	end
 
-	#select•¶‚ÌŒ‹‰Ê‚ğ‰æ‘œî•ñƒnƒbƒVƒ…‚É•ÏŠ·‚·‚é
+	#selectæ–‡ã®çµæœã‚’ç”»åƒæƒ…å ±ãƒãƒƒã‚·ãƒ¥ã«å¤‰æ›ã™ã‚‹
 	def getimgdatafromrow(row)
 		hashrow = {
 			"id" => row[0],
@@ -103,7 +108,7 @@ module BanishingImgDb
 			"comment" => row[9]
 		}
 
-		#cŠÔî•ñ‚ğ’Ç‰Á‚·‚é
+		#æ®‹æ™‚é–“æƒ…å ±ã‚’è¿½åŠ ã™ã‚‹
 		timeinfo = self.getbanishingtimeinfo(hashrow["posttime"], hashrow["timelimit"])
 		hashrow["percent"] = timeinfo["percent"]
 		hashrow["leftminutes"] = timeinfo["leftminutes"]
@@ -112,51 +117,51 @@ module BanishingImgDb
 		return hashrow
 	end
 
-	#‰æ‘œ‚Ìˆê——‚ğæ“¾‚·‚é
+	#ç”»åƒã®ä¸€è¦§ã‚’å–å¾—ã™ã‚‹
 	def getimagelist
-		#ˆê——ŒŸõ
+		#ä¸€è¦§æ¤œç´¢
 		selectsql = "SELECT * FROM BANISHINGIMAGE WHERE alive = 1 ORDER BY id DESC"
 
 		self.inittable
 
-		#ŒŸõÀs
+		#æ¤œç´¢å®Ÿè¡Œ
 		db = SQLite3::Database.new(DBFILENAME)
 		imagelist = db.execute(selectsql).collect do |row|
 			self.getimgdatafromrow(row)
 		end
 		db.close
 
-		#‰æ‘œ‚ÌŠÔØ‚ê”»’è‚ğs‚¤
+		#ç”»åƒã®æ™‚é–“åˆ‡ã‚Œåˆ¤å®šã‚’è¡Œã†
 		alivelist = filteraliveimg(imagelist)
 
 		return alivelist
 	end
 
-	#‰æ‘œˆê–‡‚Ìî•ñ‚ğæ“¾‚·‚é
+	#ç”»åƒä¸€æšã®æƒ…å ±ã‚’å–å¾—ã™ã‚‹
 	def getimage(imgid)
-		#ˆê——ŒŸõ
+		#ä¸€è¦§æ¤œç´¢
 		selectsql = "SELECT * FROM BANISHINGIMAGE WHERE id = ? AND alive = 1"
 
 		self.inittable
 
-		#ŒŸõÀs
+		#æ¤œç´¢å®Ÿè¡Œ
 		db = SQLite3::Database.new(DBFILENAME)
 		imagelist = db.execute(selectsql, imgid).collect do |row|
 			self.getimgdatafromrow(row)
 		end
 		db.close
 
-		#‰æ‘œ‚ÌŠÔØ‚ê”»’è‚ğs‚¤
+		#ç”»åƒã®æ™‚é–“åˆ‡ã‚Œåˆ¤å®šã‚’è¡Œã†
 		alivelist = filteraliveimg(imagelist)
 
 		return alivelist
 	end
 
-	#‰æ‘œ‚Ì—LŒøî•ñ‚ğ•ÏX‚·‚é
+	#ç”»åƒã®æœ‰åŠ¹æƒ…å ±ã‚’å¤‰æ›´ã™ã‚‹
 	def setimgalive(alive, imgid)
 		updatesql = "UPDATE BANISHINGIMAGE SET alive = ? WHERE id = ?"
 
-		#ƒAƒbƒvƒf[ƒgÀs
+		#ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆå®Ÿè¡Œ
 		db = SQLite3::Database.new(DBFILENAME)
 		db.execute(updatesql,
 			alive,
@@ -165,21 +170,21 @@ module BanishingImgDb
 		db.close
 	end
 
-	#î•ñ‚ğ•Ô‚·
+	#æ™‚åˆ»æƒ…å ±ã‚’è¿”ã™
 	def getbanishingtimeinfo(posttime, timelimitmin)
-		#‰æ‘œ“Še‚ğæ“¾
+		#ç”»åƒæŠ•ç¨¿æ™‚åˆ»ã‚’å–å¾—
 		posttime = DateTime.parse(posttime + "+9:00")
 
-		#ŠÔ§ŒÀi•ª’PˆÊj‚ğæ“¾
+		#æ™‚é–“åˆ¶é™ï¼ˆåˆ†å˜ä½ï¼‰ã‚’å–å¾—
 		limitminutes = timelimitmin.to_f
 
-		#‰æ‘œÁ–Å—\’è‚ğ¶¬
+		#ç”»åƒæ¶ˆæ»…äºˆå®šæ™‚åˆ»ã‚’ç”Ÿæˆ
 		limittime = posttime + (limitminutes / (24.0 * 60.0))
 
-		#Á–Å—\’è‚Æ‚Ì·‚ğ•ª‚Å¶¬
+		#æ¶ˆæ»…äºˆå®šæ™‚åˆ»ã¨ã®å·®ã‚’åˆ†ã§ç”Ÿæˆ
 		diffminutes = ((limittime - DateTime.now) * 24.0 * 60.0).to_i
 
-		#ƒp[ƒZƒ“ƒe[ƒW‚ğŒvZ‚·‚é
+		#ãƒ‘ãƒ¼ã‚»ãƒ³ãƒ†ãƒ¼ã‚¸ã‚’è¨ˆç®—ã™ã‚‹
 		if diffminutes <= 0 then
 			percent = 0
 		else

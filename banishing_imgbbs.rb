@@ -24,14 +24,52 @@ def getbanishingimg(imgdata)
 	imgpath =  File.join('images', imgdata["imagefilename"])
 	rgb = Magick::ImageList.new(imgpath).first
 
-	fillheight = (rgb.rows * ((100 - imgdata["percent"]).to_f / 100.0)).to_i
+	#消滅種類ごとに画像を生成する
+	case imgdata["banishtype"]
+	when 0
+		# 下から徐々に消していく
+		fillheight = (rgb.rows * ((100 - imgdata["percent"]).to_f / 100.0)).to_i
 
-	#背景画像を用意
-	bgimage = Magick::ImageList.new("background.png").first
+		#背景画像を用意
+		bgimage = Magick::ImageList.new("background.png").first
 
-	Magick::Draw.new do
-		self.fill_pattern = bgimage
-	end.rectangle(0, (rgb.rows - fillheight), rgb.columns, rgb.rows).draw(rgb)
+		Magick::Draw.new do
+			self.fill_pattern = bgimage
+		end.rectangle(0, (rgb.rows - fillheight), rgb.columns, rgb.rows).draw(rgb)
+	when 1
+		# 上から徐々に消していく
+		fillheight = (rgb.rows * ((100 - imgdata["percent"]).to_f / 100.0)).to_i
+
+		#背景画像を用意
+		bgimage = Magick::ImageList.new("background.png").first
+
+		Magick::Draw.new do
+			self.fill_pattern = bgimage
+		end.rectangle(0, 0, rgb.columns, fillheight).draw(rgb)
+	when 2
+		# 左から徐々に消していく
+		fillwidth = (rgb.columns * ((100 - imgdata["percent"]).to_f / 100.0)).to_i
+
+		#背景画像を用意
+		bgimage = Magick::ImageList.new("background.png").first
+
+		Magick::Draw.new do
+			self.fill_pattern = bgimage
+		end.rectangle(0, 0, fillwidth, rgb.rows).draw(rgb)
+	when 3
+		# 右から徐々に消していく
+		fillwidth = (rgb.columns * ((100 - imgdata["percent"]).to_f / 100.0)).to_i
+
+		#背景画像を用意
+		bgimage = Magick::ImageList.new("background.png").first
+
+		Magick::Draw.new do
+			self.fill_pattern = bgimage
+		end.rectangle((rgb.columns - fillwidth), 0, rgb.columns, rgb.rows).draw(rgb)
+	else
+		#想定外の消し方が指定された
+	end
+
 
 	rgb.write(bimgpath)
 
@@ -96,12 +134,17 @@ post '/upload' do
 		timelimit = 180
 	end
 
+	banishingtype = params[:banishingtype].to_i
+	if banishingtype < 0 || banishingtype > 3 then
+		banishingtype = 0
+	end
+
 	#データベースへの登録
 	imgarr = {
 		"imagefilename" => imagename,
 		"originalfilename" => params[:file][:filename],
 		"timelimit" => timelimit,
-		"banishtype" => 0,
+		"banishtype" => banishingtype,
 		"banishdirection" => 0,
 		"ipaddress" => request.ip,
 		"comment" => params[:comment]

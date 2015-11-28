@@ -146,7 +146,8 @@ post '/upload' do
 		"timelimit" => timelimit,
 		"banishtype" => banishingtype,
 		"ipaddress" => request.ip,
-		"comment" => params[:comment]
+		"comment" => params[:comment],
+		"deletepassword" => params[:deletepassword]
 	}
 
 	BanishingImgDb.insertimage(imgarr)

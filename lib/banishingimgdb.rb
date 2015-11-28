@@ -5,6 +5,7 @@ Bundler.require
 require "pp"
 require "date"
 require "securerandom"
+require 'digest/sha1'
 
 
 #データベース操作モジュール
@@ -23,7 +24,9 @@ module BanishingImgDb
 			banishtype integer NOT NULL,
 			alive integer NOT NULL,
 			postipaddress text NOT NULL,
-			comment text
+			comment text,
+			salt text,
+			deletepassword text
 		);
 		SQL
 		db = SQLite3::Database.new(DBFILENAME)
@@ -73,9 +76,17 @@ module BanishingImgDb
 					?,
 					?,
 					?,
+					?,
+					?,
 					?
 				)
 		SQL
+
+		# saltを生成する
+		salt = self.generate_salt
+
+		# 削除パスワードをハッシュ化する
+		hashedPass = imgarr["deletepassword"].crypt(salt)
 
 		db = SQLite3::Database.new(DBFILENAME)
 		db.execute(insertsql,
@@ -86,7 +97,9 @@ module BanishingImgDb
 			imgarr["banishtype"],
 			1,
 			imgarr["ipaddress"],
-			imgarr["comment"]
+			imgarr["comment"],
+			salt,
+			hashedPass
 		)
 		db.close
 	end
@@ -101,7 +114,9 @@ module BanishingImgDb
 			"timelimit" => row[4],
 			"banishtype" => row[5],
 			"ipaddress" => row[7],
-			"comment" => row[8]
+			"comment" => row[8],
+			"salt" => row[9],
+			"deletepassword" => row[10]
 		}
 
 		#残時間情報を追加する
@@ -196,6 +211,10 @@ module BanishingImgDb
 		return timeinfo
 	end
 
+	def generate_salt
+	  Digest::SHA1.hexdigest("#{Time.now.to_s}")
+	end
+
 	module_function :createtable
 	module_function :tableexists?
 	module_function :inittable
@@ -205,4 +224,5 @@ module BanishingImgDb
 	module_function :getimage
 	module_function :setimgalive
 	module_function :getbanishingtimeinfo
+	module_function :generate_salt
 end

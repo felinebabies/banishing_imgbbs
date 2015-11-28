@@ -157,6 +157,12 @@ end
 #アップロードした画像の表示
 get '/view/:imgid' do
 	@imgdata = BanishingImgDb.getimage(params[:imgid]).first
+	
+	# エラー処理
+	if imgdata == nil then
+		status 404
+		return body "Image not found."
+	end
 
 	erb :viewimg
 end
@@ -164,6 +170,12 @@ end
 #画像ファイルを返す
 get '/image/:imgid' do
 	imgdata = BanishingImgDb.getimage(params[:imgid]).first
+
+	# エラー処理
+	if imgdata == nil then
+		status 404
+		return body "Image not found."
+	end
 
 	#画像の加工処理
 	imgname = getbanishingimg(imgdata)

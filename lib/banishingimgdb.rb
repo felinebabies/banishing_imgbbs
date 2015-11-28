@@ -128,6 +128,22 @@ module BanishingImgDb
 		return hashrow
 	end
 
+	#時間切れの画像をリストとDBから削除する
+	def filteraliveimg(imagelist)
+		alivelist = imagelist.select do |imgdata|
+			aliveflag = true
+
+			if imgdata["percent"] <= 0 then
+				setimgalive(0, imgdata["id"])
+				aliveflag = false
+			end
+
+			aliveflag
+		end
+
+		return alivelist
+	end
+
 	#画像の一覧を取得する
 	def getimagelist
 		#一覧検索
@@ -143,7 +159,7 @@ module BanishingImgDb
 		db.close
 
 		#画像の時間切れ判定を行う
-		alivelist = filteraliveimg(imagelist)
+		alivelist = self.filteraliveimg(imagelist)
 
 		return alivelist
 	end
@@ -163,7 +179,7 @@ module BanishingImgDb
 		db.close
 
 		#画像の時間切れ判定を行う
-		alivelist = filteraliveimg(imagelist)
+		alivelist = self.filteraliveimg(imagelist)
 
 		return alivelist
 	end
@@ -220,6 +236,7 @@ module BanishingImgDb
 	module_function :inittable
 	module_function :insertimage
 	module_function :getimgdatafromrow
+	module_function :filteraliveimg
 	module_function :getimagelist
 	module_function :getimage
 	module_function :setimgalive

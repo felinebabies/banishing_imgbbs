@@ -76,20 +76,14 @@ def getbanishingimg(imgdata)
 	return bimgpath
 end
 
-#時間切れの画像をリストとDBから削除する
-def filteraliveimg(imagelist)
-	alivelist = imagelist.select do |imgdata|
-		aliveflag = true
+# 削除パスワードが正しいかを判定する
+def valid_deletepath?(imgid, deletepass)
+	imgdata = BanishingImgDb.getimage(imgid).first
 
-		if imgdata["percent"] <= 0 then
-			setimgalive(0, imgdata["id"])
-			aliveflag = false
-		end
+	# 削除パスワードをハッシュ化する
+	hashedPass = deletepass.crypt(imgdata['salt'])
 
-		aliveflag
-	end
-
-	return alivelist
+	hashedPass == imgdata['deletepassword']
 end
 
 #ヘルパー定義
@@ -177,4 +171,16 @@ get '/image/:imgid' do
 	content_type MIME::Types.type_for(imgname).first.to_s
 
 	File.binread(imgname)
+end
+
+# 削除処理
+post '/delete' do
+	if valid_deletepath?(params[:id], params[:deletepassword]) then
+			BanishingImgDb.setimgalive(0, params[:id])
+			@mes = "画像を削除しました。"
+		else
+			@mes = "削除パスワードに誤りがあるため、画像を削除できません。"
+	end
+
+	erb :delete
 end

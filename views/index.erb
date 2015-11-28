@@ -29,10 +29,11 @@
 		<br />
 		コメント<br />
 		<textarea name="comment" maxlength="1000" cols="40" rows="4"></textarea><br />
-		<input type="submit" value="SUBMIT" /><br />
 		<br />
 		削除パスワード(投稿の削除に必要になります)<br />
-		<input type="password" name="deletepassword" size="30" maxlength="30">
+		<input type="password" name="deletepassword" size="30" maxlength="30" />
+		<br />
+		<input type="submit" value="SUBMIT" /><br />
 	</form>
 </div>
 
@@ -54,6 +55,12 @@
 				消滅予定時刻：<%= imgdata["limittime"] %><br />
 				完全消滅まで：<%= imgdata["leftminutes"] %>分
 			</p>
+			<form name="deleteimg" method="post" action="/delete">
+				<input type="hidden" name="id" value="<%= imgdata["id"] %>" />
+				削除パスワード<br />
+				<input type="password" name="deletepassword" size="30" maxlength="30" />
+				<input type="submit" value="削除" />
+			</form>
 		</div>
 		<hr />
 	<% end %>

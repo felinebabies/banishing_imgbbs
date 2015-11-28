@@ -4,7 +4,7 @@ require 'bundler'
 Bundler.require
 
 
-require File.dirname(__FILE__) + '/banishingimgdb.rb'
+require_relative './lib/banishingimgdb.rb'
 
 #set :environment, :production
 

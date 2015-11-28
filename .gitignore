@@ -1,3 +1,6 @@
 /banishingimgdb.db
 /vendor
 /.bundle
+/public/thumbs
+/images
+/banishingimg

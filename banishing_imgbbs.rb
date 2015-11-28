@@ -8,6 +8,9 @@ require_relative './lib/banishingimgdb.rb'
 
 #set :environment, :production
 
+# アップロードできる画像の最大バイト数
+IMAGEMAXSIZE = 1 * 1024 * 1024
+
 #削除途中画像を生成して、ファイルパスを返す
 def getbanishingimg(imgdata)
 
@@ -109,6 +112,13 @@ post '/upload' do
 	end
 
 	if params[:file]
+		# ファイルサイズの確認
+		imgFileSize = File.size(params[:file][:tempfile])
+		if imgFileSize > IMAGEMAXSIZE then
+			@mes = "アップロードできる画像のファイルサイズは#{IMAGEMAXSIZE}バイトまでです。"
+			return erb :upload
+		end
+
 		fileext = File.extname(params[:file][:filename])
 		imagename = SecureRandom.uuid + fileext
 		save_path = "./images/" + imagename
@@ -157,9 +167,9 @@ end
 #アップロードした画像の表示
 get '/view/:imgid' do
 	@imgdata = BanishingImgDb.getimage(params[:imgid]).first
-	
+
 	# エラー処理
-	if imgdata == nil then
+	if @imgdata == nil then
 		status 404
 		return body "Image not found."
 	end

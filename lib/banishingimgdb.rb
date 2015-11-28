@@ -21,7 +21,6 @@ module BanishingImgDb
 			originalfilename text NOT NULL,
 			timelimit integer NOT NULL,
 			banishtype integer NOT NULL,
-			banishdirection integer NOT NULL,
 			alive integer NOT NULL,
 			postipaddress text NOT NULL,
 			comment text
@@ -74,7 +73,6 @@ module BanishingImgDb
 					?,
 					?,
 					?,
-					?,
 					?
 				)
 		SQL
@@ -86,7 +84,6 @@ module BanishingImgDb
 			imgarr["originalfilename"],
 			imgarr["timelimit"],
 			imgarr["banishtype"],
-			imgarr["banishdirection"],
 			1,
 			imgarr["ipaddress"],
 			imgarr["comment"]
@@ -103,9 +100,8 @@ module BanishingImgDb
 			"originalfilename" => row[3],
 			"timelimit" => row[4],
 			"banishtype" => row[5],
-			"banishdirection" => row[6],
-			"ipaddress" => row[8],
-			"comment" => row[9]
+			"ipaddress" => row[7],
+			"comment" => row[8]
 		}
 
 		#残時間情報を追加する

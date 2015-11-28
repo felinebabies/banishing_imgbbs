@@ -145,7 +145,6 @@ post '/upload' do
 		"originalfilename" => params[:file][:filename],
 		"timelimit" => timelimit,
 		"banishtype" => banishingtype,
-		"banishdirection" => 0,
 		"ipaddress" => request.ip,
 		"comment" => params[:comment]
 	}

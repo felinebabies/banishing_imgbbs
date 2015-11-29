@@ -148,6 +148,18 @@ post '/upload' do
 		banishingtype = 0
 	end
 
+	# 画像の読み込みを試行する
+	begin
+		rgb = Magick::ImageList.new(save_path)
+	rescue
+		@mes = "アップロードに対応している画像ではありません。"
+		return erb :upload
+	end
+
+	#サムネイルの作成
+	thumb_path = "./public/thumbs/thumb_" + imagename
+	rgb.resize_to_fill(80,80).write(thumb_path)
+
 	#データベースへの登録
 	imgarr = {
 		"imagefilename" => imagename,
@@ -161,11 +173,6 @@ post '/upload' do
 	}
 
 	BanishingImgDb.insertimage(imgarr)
-
-	#サムネイルの作成
-	thumb_path = "./public/thumbs/thumb_" + imagename
-	rgb = Magick::ImageList.new(save_path)
-	rgb.resize_to_fill(80,80).write(thumb_path)
 
 	erb :upload
 end

@@ -21,6 +21,7 @@ module BanishingImgDb
 			imagefilename text NOT NULL,
 			originalfilename text NOT NULL,
 			timelimit integer NOT NULL,
+			banishgrace integer NOT NULL,
 			banishtype integer NOT NULL,
 			alive integer NOT NULL,
 			postipaddress text NOT NULL,
@@ -78,6 +79,7 @@ module BanishingImgDb
 					?,
 					?,
 					?,
+					?,
 					?
 				)
 		SQL
@@ -94,6 +96,7 @@ module BanishingImgDb
 			imgarr["imagefilename"],
 			imgarr["originalfilename"],
 			imgarr["timelimit"],
+			imgarr["banishgrace"],
 			imgarr["banishtype"],
 			1,
 			imgarr["ipaddress"],
@@ -112,15 +115,16 @@ module BanishingImgDb
 			"imagefilename" => row[2],
 			"originalfilename" => row[3],
 			"timelimit" => row[4],
-			"banishtype" => row[5],
-			"ipaddress" => row[7],
-			"comment" => row[8],
-			"salt" => row[9],
-			"deletepassword" => row[10]
+			"banishgrace" => row[5],
+			"banishtype" => row[6],
+			"ipaddress" => row[8],
+			"comment" => row[9],
+			"salt" => row[10],
+			"deletepassword" => row[11]
 		}
 
 		#残時間情報を追加する
-		timeinfo = self.getbanishingtimeinfo(hashrow["posttime"], hashrow["timelimit"])
+		timeinfo = self.getbanishingtimeinfo(hashrow["posttime"], hashrow["timelimit"], hashrow["banishgrace"])
 		hashrow["percent"] = timeinfo["percent"]
 		hashrow["leftminutes"] = timeinfo["leftminutes"]
 		hashrow["limittime"] = timeinfo["limittime"]
@@ -198,15 +202,18 @@ module BanishingImgDb
 	end
 
 	#時刻情報を返す
-	def getbanishingtimeinfo(posttime, timelimitmin)
+	def getbanishingtimeinfo(posttime, timelimitmin, banishgracemin)
 		#画像投稿時刻を取得
 		posttime = DateTime.parse(posttime + "+9:00")
 
 		#時間制限（分単位）を取得
 		limitminutes = timelimitmin.to_f
 
+		# 猶予時間（分単位）を取得
+		graceminutes = banishgracemin.to_f
+
 		#画像消滅予定時刻を生成
-		limittime = posttime + (limitminutes / (24.0 * 60.0))
+		limittime = posttime + (graceminutes / (24.0 * 60.0)) + (limitminutes / (24.0 * 60.0))
 
 		#消滅予定時刻との差を分で生成
 		diffminutes = ((limittime - DateTime.now) * 24.0 * 60.0).to_i
@@ -216,6 +223,10 @@ module BanishingImgDb
 			percent = 0
 		else
 			percent = ((diffminutes / limitminutes) * 100).to_i
+
+			if percent > 100 then
+				percent = 100
+			end
 		end
 
 		timeinfo = {

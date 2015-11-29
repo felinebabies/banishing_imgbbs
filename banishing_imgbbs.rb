@@ -138,6 +138,11 @@ post '/upload' do
 		timelimit = 180
 	end
 
+	banishgrace = params[:banishgrace].to_i
+	if banishgrace < 0 || banishgrace > 1440 then
+		banishgrace = 60
+	end
+
 	banishingtype = params[:banishingtype].to_i
 	if banishingtype < 0 || banishingtype > 3 then
 		banishingtype = 0
@@ -148,6 +153,7 @@ post '/upload' do
 		"imagefilename" => imagename,
 		"originalfilename" => params[:file][:filename],
 		"timelimit" => timelimit,
+		"banishgrace" => banishgrace,
 		"banishtype" => banishingtype,
 		"ipaddress" => request.ip,
 		"comment" => params[:comment],

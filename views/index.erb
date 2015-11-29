@@ -8,10 +8,22 @@
 		<span>画像をアップロードする</span><br />
 		<input type="file" name="file" accept="image/jpeg,image/png" size="20" /><br />
 		<br />
-		画像消滅までの時間<br />
+		画像が消滅を始めてから完全に消滅するまでの時間<br />
 		<select name="timelimitmin">
 			<option value="60">1時間</option>
 			<option value="180" selected>3時間</option>
+			<option value="360">6時間</option>
+			<option value="720">12時間</option>
+			<option value="1440">24時間</option>
+		</select>
+		<br />
+		<br />
+		画像が消え始めるまでの猶予時間<br />
+		<select name="banishgrace">
+			<option value="0">猶予無し</option>
+			<option value="30">30分</option>
+			<option value="60" selected>1時間</option>
+			<option value="180">3時間</option>
 			<option value="360">6時間</option>
 			<option value="720">12時間</option>
 			<option value="1440">24時間</option>
@@ -53,6 +65,7 @@
 			<p>
 				投稿日時：<%= imgdata["posttime"] %><br />
 				消滅予定時刻：<%= imgdata["limittime"] %><br />
+				消滅開始までの猶予：<%= imgdata["banishgrace"] %>分<br />
 				完全消滅まで：<%= imgdata["leftminutes"] %>分
 			</p>
 			<form name="deleteimg" method="post" action="/delete">

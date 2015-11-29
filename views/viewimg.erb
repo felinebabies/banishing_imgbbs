@@ -4,6 +4,7 @@
 <p>
 	投稿日時：<%= @imgdata["posttime"] %><br />
 	消滅予定時刻：<%= @imgdata["limittime"] %><br />
+	消滅開始までの猶予：<%= @imgdata["banishgrace"] %>分<br />
 	完全消滅まで：<%= @imgdata["leftminutes"] %>分<br />
 	コメント：<%= (h @imgdata["comment"]).gsub(/\n/, '<br/>') %>
 </p>
